@@ -1,5 +1,7 @@
 
-hex editor for vim
+hex editor mode for vim using `xxd`
+
+![](https://raw.githubusercontent.com/ZSaberLv0/ZFVimHexEditor/master/preview.png)
 
 if you like my work, [check here](https://github.com/ZSaberLv0?utf8=%E2%9C%93&tab=repositories&q=ZFVim) for a list of my vim plugins
 
