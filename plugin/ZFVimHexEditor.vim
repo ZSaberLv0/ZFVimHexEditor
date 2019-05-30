@@ -15,27 +15,62 @@ function! ZF_HexEditor()
     let s:running -= 1
 endfunction
 
+if !exists('*ZF_HexEditorAutoDetect')
+    function! ZF_HexEditorAutoDetect(file)
+        return ZF_HexEditorAutoDetectDefault(a:file)
+    endfunction
+endif
+function! ZF_HexEditorAutoDetectDefault(file)
+    let maxFileSize = get(g:, 'ZFHexEditor_maxFileSize', 5*1024*1024)
+    if maxFileSize > 0 && getfsize(a:file) > maxFileSize
+        return 0
+    endif
+    let lines = readfile(a:file, 'b', 1)
+    if empty(lines)
+        return 0
+    endif
+    if lines[0] =~ '[\x00-\x08\x10-\x1a\x1c-\x1f]\{5,}'
+        return 1
+    endif
+    return 0
+endfunction
+
 let s:running = 0
 function! s:autoEnable()
     if s:running > 0
         return
     endif
-    let extList = get(g:, 'ZFHexEditor_autoEnable', [])
-    if empty(extList)
-        return
-    endif
-    let ext = fnamemodify(expand('%'), ':e')
-    for t in extList
-        if t == ext
-            if exists('b:ZFHexSaved_filetype')
-                call s:disable()
-            endif
-            call ZF_HexEditor()
-            break
+
+    let isHexFile = 0
+
+    if !isHexFile
+        let extList = get(g:, 'ZFHexEditor_autoEnable', [])
+        if !empty(extList)
+            let ext = fnamemodify(expand('%'), ':e')
+            for t in extList
+                if t == ext
+                    let isHexFile = 1
+                    break
+                endif
+            endfor
         endif
-    endfor
+    endif
+
+    if !isHexFile
+        let path = fnamemodify(expand('%'), ':p')
+        if filereadable(path)
+            let isHexFile = ZF_HexEditorAutoDetect(path)
+        endif
+    endif
+
+    if isHexFile
+        if exists('b:ZFHexSaved_filetype')
+            call s:disable()
+        endif
+        call ZF_HexEditor()
+    endif
 endfunction
-autocmd BufReadPost * :call s:autoEnable()
+autocmd BufReadPost,FileReadPost * :call s:autoEnable()
 
 function! s:enable()
     let b:ZFHexSaved_filetype=&filetype

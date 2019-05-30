@@ -15,6 +15,21 @@ if you like my work, [check here](https://github.com/ZSaberLv0?utf8=%E2%9C%93&ta
 ```
 " config file extensions that enter hex editor mode automatically
 let g:ZFHexEditor_autoEnable = ['exe', 'dll', 'so']
+
+" or, supply a custom function to detect binary file,
+" we have a builtin detect function by default,
+" you may disable it by define your own
+function! ZF_HexEditorAutoDetect(file)
+    if isHex
+        return 1
+    else
+        return 0
+    endif
+endfunction
+
+" for the builtin detect function,
+" you may setup the max file size to detect
+let g:ZFHexEditor_maxFileSize = 5*1024*1024
 ```
 
 # LIMITATION
