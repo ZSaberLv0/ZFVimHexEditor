@@ -20,11 +20,21 @@ if !exists('*ZF_HexEditorAutoDetect')
         return ZF_HexEditorAutoDetectDefault(a:file)
     endfunction
 endif
+
+if !exists('g:ZFHexEditor_ignoreFt')
+    let g:ZFHexEditor_ignoreFt = ['z', 'gz', 'bz2', 'lzma', 'xz', 'lz', 'zst']
+endif
+
 function! ZF_HexEditorAutoDetectDefault(file)
     let maxFileSize = get(g:, 'ZFHexEditor_maxFileSize', 5*1024*1024)
     if maxFileSize > 0 && getfsize(a:file) > maxFileSize
         return 0
     endif
+
+    if index(g:ZFHexEditor_ignoreFt, tolower(fnamemodify(a:file, ':e'))) >= 0
+        return 0
+    endif
+
     let lines = readfile(a:file, 'b', 1)
     if empty(lines)
         return 0
