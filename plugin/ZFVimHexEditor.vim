@@ -5,11 +5,11 @@ highlight link ZFHexChar WildMenu
 function! ZF_HexEditor()
     let s:running += 1
     try
-        call s:askSave()
+        noautocmd call s:askSave()
         if !exists('b:ZFHexSaved_filetype')
-            call s:enable()
+            noautocmd call s:enable()
         else
-            call s:disable()
+            noautocmd call s:disable()
         endif
     endtry
     let s:running -= 1
@@ -70,7 +70,7 @@ function! s:autoEnable()
         call ZF_HexEditor()
     endif
 endfunction
-autocmd BufReadPost,FileReadPost * :call s:autoEnable()
+autocmd BufReadPost,FileReadPost * :noautocmd call s:autoEnable()
 
 function! s:enable()
     let b:ZFHexSaved_filetype=&filetype
