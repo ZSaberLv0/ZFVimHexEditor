@@ -26,7 +26,7 @@ if !exists('g:ZFHexEditor_ignoreFt')
 endif
 
 function! ZF_HexEditorAutoDetectDefault(file)
-    let maxFileSize = get(g:, 'ZFHexEditor_maxFileSize', 5*1024*1024)
+    let maxFileSize = get(g:, 'ZFHexEditor_maxFileSize', 10*1024*1024)
     if maxFileSize > 0 && getfsize(a:file) > maxFileSize
         return 0
     endif

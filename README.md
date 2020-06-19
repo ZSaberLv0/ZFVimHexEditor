@@ -30,7 +30,7 @@ endfunction
 
 " for the builtin detect function,
 " you may setup the max file size to detect
-let g:ZFHexEditor_maxFileSize = 5*1024*1024
+let g:ZFHexEditor_maxFileSize = 10*1024*1024
 ```
 
 # LIMITATION
