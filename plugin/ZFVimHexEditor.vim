@@ -1,6 +1,6 @@
 
 command! -nargs=0 ZFHexEditor :call ZF_HexEditor()
-highlight link ZFHexChar WildMenu
+highlight default link ZFHexChar WildMenu
 
 function! ZF_HexEditor()
     let s:running += 1
