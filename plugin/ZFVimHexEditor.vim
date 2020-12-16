@@ -27,7 +27,7 @@ endif
 
 function! ZF_HexEditorAutoDetectDefault(file)
     let maxFileSize = get(g:, 'ZFHexEditor_maxFileSize', 10*1024*1024)
-    if maxFileSize > 0 && getfsize(a:file) > maxFileSize
+    if getfsize(a:file) > maxFileSize
         return 0
     endif
 
@@ -80,7 +80,10 @@ function! s:autoEnable()
         call ZF_HexEditor()
     endif
 endfunction
-autocmd BufReadPost,FileReadPost * :noautocmd call s:autoEnable()
+augroup ZFHexEditor_autoEnable_augroup
+    autocmd!
+    autocmd BufReadPost,FileReadPost * :noautocmd call s:autoEnable()
+augroup END
 
 function! s:enable()
     let b:ZFHexSaved_filetype=&filetype
@@ -149,9 +152,13 @@ function! s:save()
     let s:running -= 1
 endfunction
 function! s:resetUndo()
+    let modifiableSaved = &modifiable
+
     let old_undolevels = &undolevels
     set undolevels=-1
+    set modifiable
     execute "normal a \<BS>\<Esc>"
+    let &modifiable = modifiableSaved
     let &undolevels = old_undolevels
     unlet old_undolevels
 

@@ -30,7 +30,8 @@ function! ZF_HexEditorAutoDetect(file)
 endfunction
 
 " for the builtin detect function,
-" you may setup the max file size to detect
+" you may setup the max file size to detect,
+" or set to -1 to disable auto detect
 let g:ZFHexEditor_maxFileSize = 10*1024*1024
 ```
 
