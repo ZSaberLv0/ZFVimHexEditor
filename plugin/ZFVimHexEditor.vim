@@ -1,19 +1,6 @@
 
-command! -nargs=0 ZFHexEditor :call ZF_HexEditor()
+command! -nargs=0 ZFHexEditor :call ZFHexEditor()
 highlight default link ZFHexChar WildMenu
-
-function! ZF_HexEditor()
-    let s:running += 1
-    try
-        noautocmd call s:askSave()
-        if !exists('b:ZFHexSaved_filetype')
-            noautocmd call s:enable()
-        else
-            noautocmd call s:disable()
-        endif
-    endtry
-    let s:running -= 1
-endfunction
 
 if !exists('*ZF_HexEditorAutoDetect')
     function! ZF_HexEditorAutoDetect(file)
@@ -22,7 +9,18 @@ if !exists('*ZF_HexEditorAutoDetect')
 endif
 
 if !exists('g:ZFHexEditor_ignoreFt')
-    let g:ZFHexEditor_ignoreFt = ['z', 'gz', 'bz2', 'lzma', 'xz', 'lz', 'zst']
+    let g:ZFHexEditor_ignoreFt = [
+                \   '7z',
+                \   'bz2',
+                \   'gz',
+                \   'lz',
+                \   'lzma',
+                \   'rar',
+                \   'tar',
+                \   'xz',
+                \   'z',
+                \   'zip',
+                \ ]
 endif
 
 function! ZF_HexEditorAutoDetectDefault(file)
@@ -35,55 +33,58 @@ function! ZF_HexEditorAutoDetectDefault(file)
         return 0
     endif
 
-    let lines = readfile(a:file, 'b', 1)
-    if empty(lines)
-        return 0
-    endif
-    if lines[0] =~ '[\x00-\x08\x10-\x1a\x1c-\x1f]\{5,}'
-        return 1
+    let lines = readfile(a:file, 'b', 3)
+    if !empty(lines)
+        for line in lines
+            if line =~ '[\x00-\x08\x10-\x1a\x1c-\x1f]\{5,}'
+                return 1
+            endif
+        endfor
     endif
     return 0
 endfunction
 
-let s:running = 0
-function! s:autoEnable()
-    if s:running > 0
-        return
-    endif
-
-    let isHexFile = 0
-
-    if !isHexFile
-        let extList = get(g:, 'ZFHexEditor_autoEnable', [])
-        if !empty(extList)
-            let ext = fnamemodify(expand('%'), ':e')
-            for t in extList
-                if t == ext
-                    let isHexFile = 1
-                    break
-                endif
-            endfor
+if !exists('g:ZFHexEditorProcessing')
+    let g:ZFHexEditorProcessing = 0
+endif
+function! ZFHexEditor()
+    let g:ZFHexEditorProcessing += 1
+    try
+        noautocmd let continue = s:askSave()
+        if continue
+            if !exists('b:ZFHexSaved_filetype')
+                noautocmd call s:enable()
+            else
+                noautocmd call s:disable()
+            endif
         endif
-    endif
-
-    if !isHexFile
-        let path = fnamemodify(expand('%'), ':p')
-        if filereadable(path)
-            let isHexFile = ZF_HexEditorAutoDetect(path)
-        endif
-    endif
-
-    if isHexFile
-        if exists('b:ZFHexSaved_filetype')
-            call s:disable()
-        endif
-        call ZF_HexEditor()
-    endif
+    endtry
+    let g:ZFHexEditorProcessing -= 1
 endfunction
-augroup ZFHexEditor_autoEnable_augroup
-    autocmd!
-    autocmd BufReadPost,FileReadPost * :noautocmd call s:autoEnable()
-augroup END
+function! ZFHexEditorOn()
+    let g:ZFHexEditorProcessing += 1
+    try
+        if !exists('b:ZFHexSaved_filetype')
+            noautocmd let continue = s:askSave()
+            if continue
+                noautocmd call s:enable()
+            endif
+        endif
+    endtry
+    let g:ZFHexEditorProcessing -= 1
+endfunction
+function! ZFHexEditorOff()
+    let g:ZFHexEditorProcessing += 1
+    try
+        noautocmd let continue = s:askSave()
+        if continue
+            if exists('b:ZFHexSaved_filetype')
+                noautocmd call s:disable()
+            endif
+        endif
+    endtry
+    let g:ZFHexEditorProcessing -= 1
+endfunction
 
 function! s:enable()
     let b:ZFHexSaved_filetype=&filetype
@@ -128,16 +129,17 @@ function! s:askSave()
         echo '[ZFHex] file modified, save first? (y/n) '
         let choice = nr2char(getchar())
         if choice != 'y'
-            redraw!
+            redraw
             echo '[ZFHex] canceled'
-            return
+            return 0
         endif
         silent w!
         redraw!
     endif
+    return 1
 endfunction
 function! s:save()
-    let s:running += 1
+    let g:ZFHexEditorProcessing += 1
     try
         autocmd! BufWriteCmd <buffer>
         execute 'doautocmd FileWritePre ' . fnamemodify(expand('%'), ':t')
@@ -149,7 +151,7 @@ function! s:save()
         redraw!
         autocmd BufWriteCmd <buffer> silent call s:save()
     endtry
-    let s:running -= 1
+    let g:ZFHexEditorProcessing -= 1
 endfunction
 function! s:resetUndo()
     let modifiableSaved = &modifiable
