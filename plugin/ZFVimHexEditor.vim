@@ -50,12 +50,12 @@ endif
 function! ZFHexEditor()
     let g:ZFHexEditorProcessing += 1
     try
-        noautocmd let continue = s:askSave()
+        let continue = s:askSave()
         if continue
             if !exists('b:ZFHexSaved_filetype')
-                noautocmd call s:enable()
+                call s:enable()
             else
-                noautocmd call s:disable()
+                call s:disable()
             endif
         endif
     endtry
@@ -65,9 +65,9 @@ function! ZFHexEditorOn()
     let g:ZFHexEditorProcessing += 1
     try
         if !exists('b:ZFHexSaved_filetype')
-            noautocmd let continue = s:askSave()
+            let continue = s:askSave()
             if continue
-                noautocmd call s:enable()
+                call s:enable()
             endif
         endif
     endtry
@@ -76,10 +76,10 @@ endfunction
 function! ZFHexEditorOff()
     let g:ZFHexEditorProcessing += 1
     try
-        noautocmd let continue = s:askSave()
+        let continue = s:askSave()
         if continue
             if exists('b:ZFHexSaved_filetype')
-                noautocmd call s:disable()
+                call s:disable()
             endif
         endif
     endtry
@@ -91,9 +91,10 @@ function! s:enable()
     let b:ZFHexSaved_binary=&binary
     let b:ZFHexSaved_modifiable=&modifiable
     setlocal binary
-    silent edit!
+    noautocmd silent edit!
     setlocal modifiable
     silent %!xxd -g 1
+    call s:formatXxd()
     set filetype=xxd
     autocmd BufWriteCmd <buffer> silent call s:save()
     autocmd CursorMoved <buffer> silent call s:redraw()
@@ -103,7 +104,7 @@ endfunction
 function! s:disable()
     autocmd! BufWriteCmd <buffer>
     autocmd! CursorMoved <buffer>
-    silent edit!
+    noautocmd silent edit!
     call s:resetUndo()
     if exists('b:ZFHexChar_hl') && b:ZFHexChar_hl != -1
         call matchdelete(b:ZFHexChar_hl)
@@ -133,7 +134,7 @@ function! s:askSave()
             echo '[ZFHex] canceled'
             return 0
         endif
-        silent w!
+        noautocmd silent w!
         redraw!
     endif
     return 1
@@ -145,8 +146,9 @@ function! s:save()
         execute 'doautocmd FileWritePre ' . fnamemodify(expand('%'), ':t')
         execute 'doautocmd BufWritePre ' . fnamemodify(expand('%'), ':t')
         %!xxd -r
-        w!
+        noautocmd w!
         %!xxd -g 1
+        call s:formatXxd()
         set nomodified
         redraw!
         autocmd BufWriteCmd <buffer> silent call s:save()
@@ -180,5 +182,9 @@ function! s:redraw()
     elseif c >= 60 && c <= 75
         let b:ZFHexChar_hl = matchadd('ZFHexChar', '\%>' . (10+(c-60)*3) . 'c\%<' . (10+(c-60)*3+3) . 'c\%' . line('.') . 'l')
     endif
+endfunction
+function! s:formatXxd()
+    " xxd on Cygwin may cause `^M` ending
+    :%s/\%x0d//g
 endfunction
 
