@@ -189,6 +189,6 @@ function! s:redraw()
 endfunction
 function! s:formatXxd()
     " xxd on Cygwin may cause `^M` ending
-    :%s/\%x0d//g
+    :silent! %s/\%x0d//g
 endfunction
 
