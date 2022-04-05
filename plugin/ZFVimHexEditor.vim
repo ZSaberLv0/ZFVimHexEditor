@@ -8,6 +8,19 @@ if !exists('*ZF_HexEditorAutoDetect')
     endfunction
 endif
 
+if !exists('*ZF_HexEditorConvert')
+    function! ZF_HexEditorConvert()
+        silent %!xxd -g 1
+        " xxd on Cygwin may cause `^M` ending
+        execute 'silent! %s/' . nr2char(13) . '//g'
+    endfunction
+endif
+if !exists('*ZF_HexEditorRevert')
+    function! ZF_HexEditorRevert()
+        silent %!xxd -r
+    endfunction
+endif
+
 if !exists('g:ZFHexEditor_ignoreFt')
     let g:ZFHexEditor_ignoreFt = [
                 \   '7z',
@@ -94,8 +107,7 @@ function! s:enable()
     setlocal binary
     noautocmd silent edit!
     setlocal modifiable
-    silent %!xxd -g 1
-    call s:formatXxd()
+    call ZF_HexEditorConvert()
     set filetype=xxd
     set syntax=xxd
     autocmd BufWriteCmd <buffer> silent call s:save()
@@ -149,10 +161,9 @@ function! s:save()
         autocmd! BufWriteCmd <buffer>
         execute 'doautocmd FileWritePre ' . fnamemodify(expand('%'), ':t')
         execute 'doautocmd BufWritePre ' . fnamemodify(expand('%'), ':t')
-        %!xxd -r
+        call ZF_HexEditorRevert()
         noautocmd w!
-        %!xxd -g 1
-        call s:formatXxd()
+        call ZF_HexEditorConvert()
         set nomodified
         redraw!
         autocmd BufWriteCmd <buffer> silent call s:save()
@@ -186,9 +197,5 @@ function! s:redraw()
     elseif c >= 60 && c <= 75
         let b:ZFHexChar_hl = matchadd('ZFHexChar', '\%>' . (10+(c-60)*3) . 'c\%<' . (10+(c-60)*3+3) . 'c\%' . line('.') . 'l')
     endif
-endfunction
-function! s:formatXxd()
-    " xxd on Cygwin may cause `^M` ending
-    :silent! %s/\%x0d//g
 endfunction
 
