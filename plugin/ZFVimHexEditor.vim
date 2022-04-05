@@ -88,6 +88,7 @@ endfunction
 
 function! s:enable()
     let b:ZFHexSaved_filetype=&filetype
+    let b:ZFHexSaved_syntax=&syntax
     let b:ZFHexSaved_binary=&binary
     let b:ZFHexSaved_modifiable=&modifiable
     setlocal binary
@@ -96,6 +97,7 @@ function! s:enable()
     silent %!xxd -g 1
     call s:formatXxd()
     set filetype=xxd
+    set syntax=xxd
     autocmd BufWriteCmd <buffer> silent call s:save()
     autocmd CursorMoved <buffer> silent call s:redraw()
     call s:resetUndo()
@@ -113,6 +115,8 @@ function! s:disable()
 
     execute 'set filetype=' . b:ZFHexSaved_filetype
     unlet b:ZFHexSaved_filetype
+    execute 'set syntax=' . b:ZFHexSaved_syntax
+    unlet b:ZFHexSaved_syntax
 
     if !b:ZFHexSaved_binary
         setlocal nobinary

@@ -1,7 +1,7 @@
 
 augroup ZFFilePost_augroup
     autocmd!
-    autocmd BufReadPost,FileReadPost * :noautocmd call ZFFilePostAction()
+    autocmd BufReadPost,FileReadPost * :call ZFFilePostAction()
     function! ZFFilePostRegister(moduleName, checker, action)
         if !exists('g:ZFFilePost')
             let g:ZFFilePost = {}
