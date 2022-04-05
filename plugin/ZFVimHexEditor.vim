@@ -161,9 +161,11 @@ function! s:save()
         autocmd! BufWriteCmd <buffer>
         execute 'doautocmd FileWritePre ' . fnamemodify(expand('%'), ':t')
         execute 'doautocmd BufWritePre ' . fnamemodify(expand('%'), ':t')
+        let cursorSaved = getpos('.')
         call ZF_HexEditorRevert()
         noautocmd w!
         call ZF_HexEditorConvert()
+        call setpos('.', cursorSaved)
         set nomodified
         redraw!
         autocmd BufWriteCmd <buffer> silent call s:save()
