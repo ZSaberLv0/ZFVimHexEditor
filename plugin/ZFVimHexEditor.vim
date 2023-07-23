@@ -197,9 +197,10 @@ function! s:redraw()
         " may error when CursorMoved during win close
         try
             silent! call matchdelete(b:ZFHexChar_hl)
+            unlet b:ZFHexChar_hl
         catch
+            return
         endtry
-        unlet b:ZFHexChar_hl
     endif
     if !exists('b:ZFHexSaved_filetype')
         return
