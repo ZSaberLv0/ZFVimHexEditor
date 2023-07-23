@@ -194,7 +194,11 @@ function! s:resetUndo()
 endfunction
 function! s:redraw()
     if exists('b:ZFHexChar_hl') && b:ZFHexChar_hl != -1
-        call matchdelete(b:ZFHexChar_hl)
+        " may error when CursorMoved during win close
+        try
+            silent! call matchdelete(b:ZFHexChar_hl)
+        catch
+        endtry
         unlet b:ZFHexChar_hl
     endif
     if !exists('b:ZFHexSaved_filetype')
