@@ -100,6 +100,8 @@ function! ZFHexEditorOff()
 endfunction
 
 function! s:enable()
+    call ZFFilePostCleanup()
+
     let b:ZFHexSaved_filetype=&filetype
     let b:ZFHexSaved_syntax=&syntax
     let b:ZFHexSaved_binary=&binary
