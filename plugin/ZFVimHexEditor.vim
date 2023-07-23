@@ -114,6 +114,11 @@ function! s:enable()
     autocmd CursorMoved <buffer> silent call s:redraw()
     call s:resetUndo()
     silent call s:redraw()
+    try
+        call clearmatches(winnr())
+    catch
+        call clearmatches()
+    endtry
 endfunction
 function! s:disable()
     autocmd! BufWriteCmd <buffer>
